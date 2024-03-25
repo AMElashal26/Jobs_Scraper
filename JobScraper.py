@@ -110,3 +110,11 @@ def generate_visual_report(df):
 
 # Note: The actual web scraping logic, analysis, and visualization code would be more complex and needs to be tailored
 # based on the structure of the websites being scraped and the specific requirements of the analysis and report.
+
+# Example call to the function -- testing the scraping function with  parameters
+job_title = "Software Developer"
+location = "New York"
+df = scrape_indeed(job_title, location)
+
+# Expected to return a DataFrame with job listings from Indeed for Software Developer positions in New York
+print(df.head())
