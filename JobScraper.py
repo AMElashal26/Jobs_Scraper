@@ -4,9 +4,10 @@ import requests
 import pandas as pd
 
 # Updating the scrape_indeed function to include detailed scraping logic, focusing on extracting job URLs as well
+
 def scrape_indeed(job_title, location):
     """
-    Scrape job listings from Indeed for a specific job title and location, including URLs for each listing.
+    Scrape job listings from Indeed for a specific job title and location, including URLs for each listing, with added User-Agent header.
     
     Parameters:
     job_title (str): The job title to search for.
@@ -15,35 +16,30 @@ def scrape_indeed(job_title, location):
     Returns:
     DataFrame: A DataFrame containing the scraped job listings, including URLs.
     """
-    # Replace spaces with '+' for URL encoding
     job_title_url = job_title.replace(' ', '+')
     location_url = location.replace(' ', '+')
     
-    # Construct search URL
     url = f"https://www.indeed.com/jobs?q={job_title_url}&l={location_url}"
     
-    # Send a request to the URL
-    response = requests.get(url)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
     
-    # Check if the response was successful
+    response = requests.get(url, headers=headers)
+    
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Find job listings - This selector might need to be updated based on Indeed's current page structure
         job_cards = soup.find_all('div', class_='jobsearch-SerpJobCard')
         
-        # List to hold job data
         job_listings = []
         
         for job_card in job_cards:
-            # Extract job title, company, location, summary, and URL
             title = job_card.find('h2', class_='title').a.get('title')
             company = job_card.find('span', class_='company').text.strip()
             location = job_card.find('div', class_='location').text.strip() if job_card.find('div', class_='location') else 'Remote'
             summary = job_card.find('div', class_='summary').text.strip()
             job_url = 'https://www.indeed.com' + job_card.find('h2', class_='title').a.get('href')
             
-            # Append job info to the list
             job_listings.append({
                 'Title': title,
                 'Company': company,
@@ -52,7 +48,6 @@ def scrape_indeed(job_title, location):
                 'URL': job_url
             })
         
-        # Convert list of job data into a DataFrame
         return pd.DataFrame(job_listings)
     else:
         print(f"Failed to retrieve jobs from Indeed: Status code {response.status_code}")
